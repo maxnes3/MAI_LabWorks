@@ -30,10 +30,8 @@ def display_data():
         return render_template('error_data.html',
                                error_info='Невернные данные')
 
-    # Выбор диапазона данных
     selected_data = csv_data.iloc[start_row-1:end_row, start_col-1:end_col]
 
-    # Описание столбцов
     column_descriptions = []
     for col in selected_data.columns:
         col_data = selected_data[col]
@@ -48,7 +46,6 @@ def display_data():
         }
         column_descriptions.append(col_description)
 
-    # Описание набора данных
     dataset_description = {
         'total_rows': len(selected_data),
         'total_cols': len(selected_data.columns),
@@ -56,7 +53,6 @@ def display_data():
         'num_filled_cells': selected_data.count().sum()
     }
 
-    # Генерация описания столбцов и набора данных на основе num2words
     for col_desc in column_descriptions:
         col_desc['empty_cells_words'] = num2words(col_desc['empty_cells'], lang='ru')
         col_desc['filled_cells_words'] = num2words(col_desc['filled_cells'], lang='ru')
@@ -76,8 +72,6 @@ def display_data():
 
 @app.route('/download', methods=['GET'])
 def download_file():
-
-    # Отправьте файл на клиентскую сторону
     return send_file('data.csv', as_attachment=True)
 
 
