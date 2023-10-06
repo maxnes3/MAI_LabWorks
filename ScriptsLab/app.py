@@ -11,7 +11,10 @@ def load_data(filename):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    csv_data = load_data('data.csv')
+    return render_template('index.html',
+                           max_row=len(csv_data),
+                           max_col=len(csv_data.columns))
 
 
 @app.route('/display_data', methods=['POST'])

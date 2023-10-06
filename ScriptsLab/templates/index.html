@@ -10,19 +10,19 @@
         <form class="mb-3" action="/display_data" method="POST">
             <div class="form-group mb-3">
                 <label for="start_row" class="fw-semibold">Начальная строка:</label>
-                <input type="number" id="start_row" name="start_row" class="form-control" required>
+                <input type="number" id="start_row" name="start_row" class="form-control" required placeholder="от 1 до {{max_row}}">
             </div>
             <div class="form-group mb-3">
                 <label for="end_row" class="fw-semibold">Конечная строка:</label>
-                <input type="number" id="end_row" name="end_row" class="form-control" required>
+                <input type="number" id="end_row" name="end_row" class="form-control" required placeholder="от 1 до {{max_row}}">
             </div>
             <div class="form-group mb-3">
                 <label for="start_col" class="fw-semibold">Начальная колонка:</label>
-                <input type="number" id="start_col" name="start_col" class="form-control" required placeholder="от 1 до 7">
+                <input type="number" id="start_col" name="start_col" class="form-control" required placeholder="от 1 до {{max_col}}">
             </div>
             <div class="form-group mb-3">
                 <label for="end_col" class="fw-semibold">Конечная колонка:</label>
-                <input type="number" id="end_col" name="end_col" class="form-control" required placeholder="от 1 до 7">
+                <input type="number" id="end_col" name="end_col" class="form-control" required placeholder="от 1 до {{max_col}}">
             </div>
             <div class="text-center">
                 <button type="submit" class="btn btn-success">Вывести данные</button>
