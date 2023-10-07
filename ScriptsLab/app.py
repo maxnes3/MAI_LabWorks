@@ -9,6 +9,10 @@ def load_data(filename):
     return pd.read_csv(filename)
 
 
+def throw_error(message):
+    return render_template('error_data.html', error_info=message)
+
+
 @app.route('/')
 def index():
     csv_data = load_data('stroke_data.csv')
@@ -30,8 +34,7 @@ def display_data():
     end_col < 1 or end_col > len(csv_data.columns) or
     start_row < 1 or start_row > len(csv_data) or
     end_row < 1 or end_row > len(csv_data)):
-        return render_template('error_data.html',
-                               error_info='Невернные данные')
+        return throw_error('Невернные данные')
 
     selected_data = csv_data.iloc[start_row-1:end_row, start_col-1:end_col]
 
@@ -83,6 +86,10 @@ def analysis_data():
     selected_column = str(request.form['selected_column'])
 
     filtered_df = csv_data.groupby(selected_condition)
+
+    if not (condition_value in filtered_df.groups):
+        return throw_error('Значения нету в колонке')
+
     filtered_df = filtered_df.get_group(condition_value)
 
     min_value = filtered_df[selected_column].min()
