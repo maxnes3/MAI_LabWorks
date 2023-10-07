@@ -11,7 +11,7 @@ def load_data(filename):
 
 @app.route('/')
 def index():
-    csv_data = load_data('data.csv')
+    csv_data = load_data('stroke_data.csv')
     return render_template('index.html',
                            max_row=len(csv_data),
                            max_col=len(csv_data.columns))
@@ -19,7 +19,7 @@ def index():
 
 @app.route('/display_data', methods=['POST'])
 def display_data():
-    csv_data = load_data('data.csv')
+    csv_data = load_data('stroke_data.csv')
 
     start_row = int(request.form['start_row'])
     end_row = int(request.form['end_row'])
@@ -69,13 +69,37 @@ def display_data():
         'display_data.html',
         selected_data=selected_data.to_html(classes='table table-dark table-bordered table-hover'),
         column_descriptions=column_descriptions,
-        dataset_description=dataset_description
+        dataset_description=dataset_description,
+        columns=selected_data.columns
     )
+
+
+@app.route('/analysis_data', methods=['POST'])
+def analysis_data():
+    csv_data = load_data('stroke_data.csv')
+
+    selected_condition = str(request.form['selected_condition'])
+    condition_value = str(request.form['condition_value'])
+    selected_column = str(request.form['selected_column'])
+
+    filtered_df = csv_data.groupby(selected_condition)
+    filtered_df = filtered_df.get_group(condition_value)
+
+    min_value = filtered_df[selected_column].min()
+    mean_value = filtered_df[selected_column].mean()
+    max_value = filtered_df[selected_column].max()
+
+    return render_template('analysis_data.html',
+                           min_value=round(min_value, 2),
+                           mean_value=round(mean_value, 2),
+                           max_value=round(max_value, 2),
+                           column_name=selected_column,
+                           filtered_df=filtered_df.to_html(classes='table table-dark table-bordered table-hover'))
 
 
 @app.route('/download', methods=['GET'])
 def download_file():
-    return send_file('data.csv', as_attachment=True)
+    return send_file('stroke_data.csv', as_attachment=True)
 
 
 if __name__ == '__main__':
