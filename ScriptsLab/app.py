@@ -152,7 +152,7 @@ def graphics_data():
     x = range(len(df))
     ax.bar(x, df['Data1'], width, label='CSV-файл')
     ax.bar([i + width for i in x], df['Data2'], width, label='CSV-файл + 10%')
-    ax.set_xlabel('Категории')
+    ax.set_xlabel('Показатели')
     ax.set_ylabel('Значения')
     ax.set_title('Сравнение данных')
     ax.set_xticks([i + width / 2 for i in x])
