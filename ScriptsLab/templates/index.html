@@ -53,6 +53,16 @@
                 <button type="submit" class="btn btn-warning">Анализ</button>
             </div>
         </form>
+        <h1 class="mb-4">Анализ с помощью Фильтра Блума</h1>
+        <form class="mb-3" action="/bloomfilter_data" method="POST">
+            <div class="form-group mb-3">
+                <label for="search_words" class="fw-semibold">Начальная строка:</label>
+                <input type="text" id="search_words" name="search_words" class="form-control" required placeholder="Введите слова через пробел">
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-info">Поиск</button>
+            </div>
+        </form>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 </body>

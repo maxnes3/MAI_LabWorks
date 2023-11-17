@@ -4,6 +4,7 @@ from num2words import num2words
 import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
+from BloomFilter import BloomFilter
 
 app = Flask(__name__)
 
@@ -172,6 +173,55 @@ def graphics_data():
     return render_template('graphics_data.html',
                            plot_url=plot_url,
                            column_name=selected_column)
+
+
+@app.route('/bloomfilter_data', methods=['POST'])
+def bloomfilter_data():
+    search_words = str(request.form['search_words']).split()
+
+    name_href_1 = ['Stroke Prediction Dataset',
+                   'https://www.kaggle.com/datasets/fedesoriano/stroke-prediction-dataset',
+                   False]
+    name_href_2 = ['Supermarket store branches sales analysis',
+                   'https://www.kaggle.com/datasets/surajjha101/stores-area-and-sales-data',
+                   False]
+    name_href_3 = ['NASA - Nearest Earth Objects',
+                   'https://www.kaggle.com/datasets/sameepvani/nasa-nearest-earth-objects',
+                   False]
+
+    colums_1 = ['id', 'gender', 'age', 'hypertension', 'heart_disease', 'ever_married',
+                'work_type', 'Residence_type', 'avg_glucose_level', 'bmi']
+    colums_2 = ['Store ID', 'Store_Area', 'Items_Available', 'Store_Sales']
+    colums_3 = ['id', 'name', 'est_diameter_min', 'relative_velocity', 'miss_distance',
+                'orbiting_body', 'sentry_object', 'hazardous']
+
+    bloomFilter_1 = BloomFilter(colums_1, 400, 4)
+    bloomFilter_2 = BloomFilter(colums_2, 400, 4)
+    bloomFilter_3 = BloomFilter(colums_3, 400, 4)
+
+    output_matrix = []
+
+    for item in search_words:
+        output_matrix.append({
+            'name': item,
+            'check_1': bloomFilter_1.check(item),
+            'check_2': bloomFilter_2.check(item),
+            'check_3': bloomFilter_3.check(item)})
+
+        if bloomFilter_1.check(item):
+            name_href_1[2] = bloomFilter_1.check(item)
+
+        if bloomFilter_2.check(item):
+            name_href_2[2] = bloomFilter_2.check(item)
+
+        if bloomFilter_3.check(item):
+            name_href_3[2] = bloomFilter_3.check(item)
+
+    return render_template('bloomfilter_data.html',
+                           name_1=name_href_1[0], href_1=name_href_1[1], check_1=name_href_1[2],
+                           name_2=name_href_2[0], href_2=name_href_2[1], check_2=name_href_2[2],
+                           name_3=name_href_3[0], href_3=name_href_3[1], check_3=name_href_3[2],
+                           output_matrix=output_matrix)
 
 
 @app.route('/download', methods=['GET'])
