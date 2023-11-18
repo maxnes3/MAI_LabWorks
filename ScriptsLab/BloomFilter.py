@@ -3,14 +3,14 @@ from bitarray import bitarray
 
 # djb2 Хэш-функция
 def hashfun(hash_input, shift):
-    res = 5381
+    hash = 5381
 
-    res = ((res << 5) + res) + shift
+    hash = ((hash << 5) + hash) + shift
 
     for ch in hash_input:
-        res = ((res << 5) + res) + ord(ch)
+        hash = ((hash << 5) + hash) + ord(ch)
 
-    return res
+    return hash
 
 
 class BloomFilter:
