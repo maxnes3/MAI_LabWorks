@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
 from BloomFilter import BloomFilter
+from PairedRegression import PairedRegression
 
 app = Flask(__name__)
 
@@ -20,10 +21,12 @@ def throw_error(message):
 @app.route('/')
 def index():
     csv_data = load_data('stroke_data.csv')
+    numeric_columns = csv_data.select_dtypes(include='number').columns.tolist()
     return render_template('index.html',
                            max_row=len(csv_data),
                            max_col=len(csv_data.columns),
-                           columns=csv_data.columns)
+                           columns=csv_data.columns,
+                           numeric_columns=numeric_columns)
 
 
 @app.route('/display_data', methods=['POST'])
@@ -222,6 +225,51 @@ def bloomfilter_data():
                            name_2=name_href_2[0], href_2=name_href_2[1], check_2=name_href_2[2],
                            name_3=name_href_3[0], href_3=name_href_3[1], check_3=name_href_3[2],
                            output_matrix=output_matrix)
+
+
+@app.route('/regression_data', methods=['POST'])
+def regression_data():
+    csv_data = load_data('stroke_data.csv')
+
+    selected_column1 = str(request.form['selected_column1'])
+    selected_column2 = str(request.form['selected_column2'])
+
+    if selected_column1 == selected_column2:
+        return throw_error("Нужно выбрать разные колонки")
+
+    big_data = csv_data.sample(frac=0.99)
+    small_data = csv_data.drop(big_data.index)
+
+    model1 = PairedRegression(big_data, selected_column1, selected_column2)
+
+    plt.figure(figsize=(12, 10))
+
+    plt.subplot(2, 1, 1)
+    plt.scatter(big_data[selected_column1].values, big_data[selected_column2].values, alpha=0.4)
+    plt.plot(big_data[selected_column1], model1.predict(big_data[selected_column1].values),
+             color='red', linewidth=3)
+    plt.xlabel(selected_column1)
+    plt.ylabel(selected_column2)
+
+    model2 = PairedRegression(small_data, selected_column1, selected_column2)
+
+    plt.subplot(2, 1, 2)
+    plt.scatter(small_data[selected_column1].values, small_data[selected_column2].values, alpha=0.4)
+    plt.plot(small_data[selected_column1], model2.predict(small_data[selected_column1].values),
+             color='red', linewidth=3)
+    plt.xlabel(selected_column1)
+    plt.ylabel(selected_column2)
+
+    img = BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+
+    graph_url = base64.b64encode(img.read()).decode()
+
+    return render_template("regression_data.html",
+                           graph_url=graph_url,
+                           selected_column1=selected_column1,
+                           selected_column2=selected_column2)
 
 
 @app.route('/download', methods=['GET'])
