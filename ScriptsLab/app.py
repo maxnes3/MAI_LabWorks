@@ -246,14 +246,14 @@ def regression_data():
 
     plt.subplot(2, 1, 1)
     plt.scatter(big_data[selected_column1].values, big_data[selected_column2].values, alpha=0.4)
-    plt.plot(big_data[selected_column1], model.predict(big_data[selected_column1].values),
+    plt.plot(big_data[selected_column1].values, model.predict(big_data[selected_column1].values),
              color='red', linewidth=3)
     plt.xlabel(selected_column1)
     plt.ylabel(selected_column2)
 
     plt.subplot(2, 1, 2)
     plt.scatter(small_data[selected_column1].values, small_data[selected_column2].values, alpha=0.4)
-    plt.plot(small_data[selected_column1], model.predict(small_data[selected_column1].values),
+    plt.plot(small_data[selected_column1].values, model.predict(small_data[selected_column1].values),
              color='red', linewidth=3)
     plt.xlabel(selected_column1)
     plt.ylabel(selected_column2)

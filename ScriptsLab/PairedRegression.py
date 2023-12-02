@@ -15,6 +15,9 @@ class PairedRegression:
         X = X[~np.isnan(X.astype(float))]
         Y = Y[~np.isnan(Y.astype(float))]
 
+        if not (len(X) == len(Y)):
+            raise ValueError("X и Y разного размера")
+
         # Вычисляем суммы
         sumX = sum(X)
         sumY = sum(Y)
