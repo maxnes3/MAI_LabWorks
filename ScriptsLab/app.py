@@ -240,22 +240,20 @@ def regression_data():
     big_data = csv_data.sample(frac=0.99)
     small_data = csv_data.drop(big_data.index)
 
-    model1 = PairedRegression(big_data, selected_column1, selected_column2)
+    model = PairedRegression(big_data, selected_column1, selected_column2)
 
     plt.figure(figsize=(12, 10))
 
     plt.subplot(2, 1, 1)
     plt.scatter(big_data[selected_column1].values, big_data[selected_column2].values, alpha=0.4)
-    plt.plot(big_data[selected_column1], model1.predict(big_data[selected_column1].values),
+    plt.plot(big_data[selected_column1], model.predict(big_data[selected_column1].values),
              color='red', linewidth=3)
     plt.xlabel(selected_column1)
     plt.ylabel(selected_column2)
 
-    model2 = PairedRegression(small_data, selected_column1, selected_column2)
-
     plt.subplot(2, 1, 2)
     plt.scatter(small_data[selected_column1].values, small_data[selected_column2].values, alpha=0.4)
-    plt.plot(small_data[selected_column1], model2.predict(small_data[selected_column1].values),
+    plt.plot(small_data[selected_column1], model.predict(small_data[selected_column1].values),
              color='red', linewidth=3)
     plt.xlabel(selected_column1)
     plt.ylabel(selected_column2)
