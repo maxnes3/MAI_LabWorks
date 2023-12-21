@@ -1,9 +1,12 @@
+import numpy as np
+
+
 class DecisionTree:
     def __init__(self, min_samples, max_depth, data):
         self.min_samples = min_samples
         self.max_depth = max_depth
         self.data = data
-        self.trainInit()
+        self.train_init()
 
     def get_max_mse(self, samples, mse, param):
         sorted_samples = sorted(samples, key=lambda x: self.data[x][param])
@@ -39,55 +42,35 @@ class DecisionTree:
                 (is_left and row[param] <= val) or (not is_left and row[param] > val)]
 
     def train(self, node, depth):
-        node["predict"] = 0
-        node["mse"] = 0
+        samples = node["samples"]
+        bmi_values = np.array([self.data[i]["bmi"] for i in samples])
+
+        node["predict"] = np.mean(bmi_values)
+        node["mse"] = np.mean((bmi_values - node["predict"]) ** 2)
         node["isLeaf"] = False
 
-        for i in node["samples"]:
-            node["predict"] += self.data[i]["bmi"]
-
-        node["predict"] /= len(node["samples"])
-
-        for i in node["samples"]:
-            diff = (self.data[i]["bmi"] - node["predict"]) ** 2
-            node["mse"] += diff
-
-        node["mse"] /= len(node["samples"])
-
-        if depth == self.max_depth:
+        if depth == self.max_depth or len(samples) == self.min_samples:
             return
 
-        if len(node["samples"]) == self.min_samples:
-            return
-
-        val1 = self.get_max_mse(node["samples"], node["mse"], "age")
-        val2 = self.get_max_mse(node["samples"], node["mse"], "gender")
+        val1 = self.get_max_mse(samples, node["mse"], "age")
+        val2 = self.get_max_mse(samples, node["mse"], "gender")
 
         if val1["val"] == -1 and val2["val"] == -1:
             node["isLeaf"] = True
             return
 
-        maxVal = val1
-        param = "age"
+        max_val, param = (val1, "age") if val1["mse"] >= val2["mse"] else (val2, "gender")
 
-        if val2["mse"] > val1["mse"]:
-            maxVal = val2
-            param = "gender"
-
-        node["val"] = maxVal["val"]
+        node["val"] = max_val["val"]
         node["param"] = param
 
-        node["left"] = {}
-        node["left"]["samples"] = self.get_samples(maxVal["val"], param, True)
-
+        node["left"] = {"samples": self.get_samples(max_val["val"], param, True)}
         self.train(node["left"], depth + 1)
 
-        node["right"] = {}
-        node["right"]["samples"] = self.get_samples(maxVal["val"], param, False)
-
+        node["right"] = {"samples": self.get_samples(max_val["val"], param, False)}
         self.train(node["right"], depth + 1)
 
-    def trainInit(self):
+    def train_init(self):
         self.tree = {}
         self.tree["samples"] = []
 
@@ -100,19 +83,14 @@ class DecisionTree:
         elem = {"age": age, "gender": gender}
         current = self.tree
         res = 0
-
         depth = 1
 
         while True:
             res = current["predict"]
 
-            if current["isLeaf"]:
-                break
-
-            if depth == self.max_depth:
-                break
-
-            if len(current["samples"]) <= self.min_samples:
+            if (current["isLeaf"] or
+                    depth == self.max_depth or
+                    len(current["samples"]) <= self.min_samples):
                 break
 
             if elem[current["param"]] <= current["val"]:

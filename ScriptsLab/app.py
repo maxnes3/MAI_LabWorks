@@ -302,7 +302,7 @@ def decisiontree_data():
             "column2": "gender",
             "value2": row["gender"],
             "target": row["bmi"],
-            "predict": tree.get_prediction(age=row["age"], gender=row["gender"])
+            "predict": round(tree.get_prediction(age=row["age"], gender=row["gender"]), 5)
         })
 
     return render_template("decisiontree_data.html",
