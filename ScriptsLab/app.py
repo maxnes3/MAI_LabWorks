@@ -6,6 +6,7 @@ from io import BytesIO
 import base64
 from BloomFilter import BloomFilter
 from PairedRegression import PairedRegression
+from DecisionTree import DecisionTree
 
 app = Flask(__name__)
 
@@ -268,6 +269,34 @@ def regression_data():
                            graph_url=graph_url,
                            selected_column1=selected_column1,
                            selected_column2=selected_column2)
+
+
+@app.route("/decisiontree_data", methods=['GET'])
+def decisiontree_data():
+    csv_data = load_data('stroke_data.csv')
+    csv_data = csv_data.dropna()
+
+    csv_data['gender'] = csv_data['gender'].map({'Male': 0, 'Female': 1})
+
+    learn_rows = csv_data.sample(n=25, random_state=42)
+    test_rows = csv_data.sample(n=5, random_state=42)
+
+    tree = DecisionTree(min_samples=2, max_depth=3, data=learn_rows.to_dict('records'))
+    output_test = []
+    for index, row in test_rows.iterrows():
+        output_test.append({
+            "column1": "age",
+            "value1": row["age"],
+            "column2": "gender",
+            "value2": row["gender"],
+            "target": row["bmi"],
+            "predict": tree.getPrediction(age=row["age"], gender=row["gender"])
+        })
+
+    return render_template("decisiontree_data.html",
+                           learn_rows=learn_rows.to_html(classes='table table-dark table-bordered table-hover'),
+                           test_rows=test_rows.to_html(classes='table table-dark table-bordered table-hover'),
+                           output_test=output_test)
 
 
 @app.route('/download', methods=['GET'])
