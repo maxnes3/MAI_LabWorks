@@ -5,64 +5,38 @@ class DecisionTree:
         self.data = data
         self.trainInit()
 
-    def getMaxMse(self, samples, mse, param):
-        sortedSamples = sorted(samples, key=lambda x: self.data[x][param])
+    def get_max_mse(self, samples, mse, param):
+        sorted_samples = sorted(samples, key=lambda x: self.data[x][param])
 
-        maxMse = -1e8
-        maxVal = -1
+        max_mse = -1e8
+        max_val = -1
 
         for i in range(self.min_samples - 1, len(samples) - self.min_samples):
-            if self.data[sortedSamples[i]][param] == self.data[sortedSamples[i + 1]][param]:
+            if self.data[sorted_samples[i]][param] == self.data[sorted_samples[i + 1]][param]:
                 continue
 
-            predict1 = 0
-            predict2 = 0
-
-            for j in range(len(samples)):
-                ind = sortedSamples[j]
-                if j <= i:
-                    predict1 += self.data[ind]["bmi"]
-                else:
-                    predict2 += self.data[ind]["bmi"]
+            predict1 = sum(self.data[sorted_samples[j]]["bmi"] for j in range(i + 1))
+            predict2 = sum(self.data[sorted_samples[j]]["bmi"] for j in range(i + 1, len(samples)))
 
             predict1 /= i + 1
             predict2 /= len(samples) - i - 1
 
-            mse1 = 0
-            mse2 = 0
-
-            for j in range(len(samples)):
-                ind = sortedSamples[j]
-                if j <= i:
-                    diff = (self.data[ind]["bmi"] - predict1) ** 2
-                    mse1 += diff
-                else:
-                    diff = (self.data[ind]["bmi"] - predict2) ** 2
-                    mse2 += diff
+            mse1 = sum((self.data[sorted_samples[j]]["bmi"] - predict1) ** 2 for j in range(i + 1))
+            mse2 = sum((self.data[sorted_samples[j]]["bmi"] - predict2) ** 2 for j in range(i + 1, len(samples)))
 
             mse1 /= i + 1
             mse2 /= len(samples) - i - 1
 
-            currVal = mse - mse1 - mse2
-            if currVal > maxMse:
-                maxMse = currVal
-                maxVal = (self.data[sortedSamples[i + 1]][param] + self.data[sortedSamples[i]][param]) / 2
+            curr_val = mse - mse1 - mse2
+            if curr_val > max_mse:
+                max_mse = curr_val
+                max_val = (self.data[sorted_samples[i + 1]][param] + self.data[sorted_samples[i]][param]) / 2
 
-        return {
-            'val': maxVal,
-            'mse': maxMse
-        }
+        return {'val': max_val, 'mse': max_mse}
 
-    def getSamples(self, val, param, isLeft):
-        res = []
-        for i in range(len(self.data)):
-            if isLeft and self.data[i][param] <= val:
-                res.append(i)
-
-            if not isLeft and self.data[i][param] > val:
-                res.append(i)
-
-        return res
+    def get_samples(self, val, param, is_left):
+        return [i for i, row in enumerate(self.data) if
+                (is_left and row[param] <= val) or (not is_left and row[param] > val)]
 
     def train(self, node, depth):
         node["predict"] = 0
@@ -86,8 +60,8 @@ class DecisionTree:
         if len(node["samples"]) == self.min_samples:
             return
 
-        val1 = self.getMaxMse(node["samples"], node["mse"], "age")
-        val2 = self.getMaxMse(node["samples"], node["mse"], "gender")
+        val1 = self.get_max_mse(node["samples"], node["mse"], "age")
+        val2 = self.get_max_mse(node["samples"], node["mse"], "gender")
 
         if val1["val"] == -1 and val2["val"] == -1:
             node["isLeaf"] = True
@@ -104,12 +78,12 @@ class DecisionTree:
         node["param"] = param
 
         node["left"] = {}
-        node["left"]["samples"] = self.getSamples(maxVal["val"], param, True)
+        node["left"]["samples"] = self.get_samples(maxVal["val"], param, True)
 
         self.train(node["left"], depth + 1)
 
         node["right"] = {}
-        node["right"]["samples"] = self.getSamples(maxVal["val"], param, False)
+        node["right"]["samples"] = self.get_samples(maxVal["val"], param, False)
 
         self.train(node["right"], depth + 1)
 
@@ -122,7 +96,7 @@ class DecisionTree:
 
         self.train(self.tree, 1)
 
-    def getPrediction(self, age, gender):
+    def get_prediction(self, age, gender):
         elem = {"age": age, "gender": gender}
         current = self.tree
         res = 0

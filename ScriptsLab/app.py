@@ -271,17 +271,29 @@ def regression_data():
                            selected_column2=selected_column2)
 
 
-@app.route("/decisiontree_data", methods=['GET'])
+@app.route("/decisiontree_data", methods=['POST'])
 def decisiontree_data():
     csv_data = load_data('stroke_data.csv')
     csv_data = csv_data.dropna()
+
+    min_samples = str(request.form['min_samples'])
+    max_depth = str(request.form['max_depth'])
+
+    if len(min_samples) == 0 or int(min_samples) < 1:
+        min_samples = "2"
+
+    if len(max_depth) == 0 or int(max_depth) < 1:
+        max_depth = "3"
+
+    min_samples = int(min_samples)
+    max_depth = int(max_depth)
 
     csv_data['gender'] = csv_data['gender'].map({'Male': 0, 'Female': 1})
 
     learn_rows = csv_data.sample(n=25, random_state=42)
     test_rows = csv_data.sample(n=5, random_state=42)
 
-    tree = DecisionTree(min_samples=2, max_depth=3, data=learn_rows.to_dict('records'))
+    tree = DecisionTree(min_samples=min_samples, max_depth=max_depth, data=learn_rows.to_dict('records'))
     output_test = []
     for index, row in test_rows.iterrows():
         output_test.append({
@@ -290,7 +302,7 @@ def decisiontree_data():
             "column2": "gender",
             "value2": row["gender"],
             "target": row["bmi"],
-            "predict": tree.getPrediction(age=row["age"], gender=row["gender"])
+            "predict": tree.get_prediction(age=row["age"], gender=row["gender"])
         })
 
     return render_template("decisiontree_data.html",

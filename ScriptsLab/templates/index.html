@@ -83,7 +83,15 @@
             </div>
         </form>
         <h1 class="mb-4">Дерево решений</h1>
-        <form class="mb-3" action="/decisiontree_data" method="GET">
+        <form class="mb-3" action="/decisiontree_data" method="POST">
+            <div class="form-group mb-3">
+                <label for="min_samples" class="fw-semibold">min_samples:</label>
+                <input type="number" id="min_samples" name="min_samples" class="form-control" required placeholder="Введите min_samples">
+            </div>
+            <div class="form-group mb-3">
+                <label for="max_depth" class="fw-semibold">max_depth:</label>
+                <input type="number" id="max_depth" name="max_depth" class="form-control" required placeholder="Введите max_depth">
+            </div>
             <div class="text-center">
                 <button type="submit" class="btn btn-success">Построить дерево</button>
             </div>
