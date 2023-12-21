@@ -7,6 +7,8 @@ import base64
 from BloomFilter import BloomFilter
 from PairedRegression import PairedRegression
 from DecisionTree import DecisionTree
+from KMeansCluster import KMeansCluster
+import numpy as np
 
 app = Flask(__name__)
 
@@ -309,6 +311,41 @@ def decisiontree_data():
                            learn_rows=learn_rows.to_html(classes='table table-dark table-bordered table-hover'),
                            test_rows=test_rows.to_html(classes='table table-dark table-bordered table-hover'),
                            output_test=output_test)
+
+
+@app.route('/clusterization_data', methods=['POST'])
+def clusterization_data():
+    csv_data = load_data('stroke_data.csv')
+
+    first_column = str(request.form['first_column'])
+    second_column = str(request.form['second_column'])
+    count_clusters = int(request.form['count_clusters'])
+
+    csv_data = csv_data.sample(frac=0.2, random_state=0)
+
+    first_data = np.array(csv_data[first_column])
+    second_data = np.array(csv_data[second_column])
+
+    X = np.column_stack((first_data, second_data))
+
+    kmeans = KMeansCluster(count_clusters)
+    labels, centroids = kmeans.fit(X)
+
+    plt.scatter(X[:, 0], X[:, 1], c=labels, alpha=0.4, cmap='viridis', marker='o', edgecolors='k')
+    plt.scatter(centroids[:, 0], centroids[:, 1], c='red', marker='X', s=200, label='Центроиды')
+    plt.xlabel(first_column)
+    plt.ylabel(second_column)
+    plt.title('K-Means Кластеризация')
+    plt.legend()
+
+    img = BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+
+    graph_url = base64.b64encode(img.read()).decode()
+    plt.close()
+
+    return render_template("clusterization_data.html", graph=graph_url)
 
 
 @app.route('/download', methods=['GET'])
